@@ -13,17 +13,26 @@ namespace Test1.Controllers
         }
 
         [HttpPost]
-        public IActionResult UserLogin(IFormCollection form) {
-            string userName = form["Username"];
-            string password = form["Password"];
-            //pass this va;ue tp database and check whether the user and password is there.
-            UserService userService = new UserService();
-            bool iaValid = userService.LoginUser(userName, password);
-            if (iaValid)
-                ViewData["Message"] = "Success...";
+        public IActionResult UserLogin(IFormCollection form)
+        {
+            if (form.TryGetValue("Username", out StringValues userNameValues) &&
+                form.TryGetValue("Password", out StringValues passwordValues))
+            {
+                string userName = userNameValues.ToString();
+                string password = passwordValues.ToString();
+
+                // Pass these values to the database and check whether the user and password exist.  
+                UserService userService = new UserService();
+                bool isValid = userService.LoginUser(userName, password);
+
+                ViewData["Message"] = isValid ? "Success..." : "Failed...";
+            }
             else
+            {
                 ViewData["Message"] = "Failed...";
-                return View();
+            }
+
+            return View();
         }
     }
 }
